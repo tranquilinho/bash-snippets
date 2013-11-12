@@ -1,0 +1,17 @@
+#!/bin/bash
+# Monitor MOAB's blocked jobs
+# Author: Jesus Cuenca (jcuenca@cnb.csic.es)
+# See License file
+
+. /etc/nagios/custom_scripts.cfg
+. ${MOAB_LIB}
+
+parse_cmd_arguments $@
+
+readonly blocked=$( get_blocked_jobs )
+
+check_value ${blocked} ${WARNING} ${CRITICAL}
+status=$?
+echo ${blocked}
+exit ${status}
+

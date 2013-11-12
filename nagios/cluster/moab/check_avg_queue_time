@@ -1,0 +1,33 @@
+#!/bin/bash
+# Monitor MOAB's hours in queue (average)
+# Author: Jesus Cuenca (jcuenca@cnb.csic.es)
+# See License file
+# Note: inspecting users jobs require privileges that nagios account may not have
+# So you probably will have to run this script with sudo...
+
+. /etc/nagios/custom_scripts.cfg
+. ${MOAB_LIB}
+
+parse_cmd_arguments $@
+
+total_hours=0
+queued_jobs=$( get_jobs_in_queue)
+njobs=${#queued_jobs[@]}
+
+for job in "${queued_jobs[@]}"; do
+    queue_time=$( get_queue_time ${job} )
+    queue_hours=$( time_to_hours ${queue_time} )
+    total_hours=$(( total_hours + queue_hours ))
+done
+
+if [ ${njobs} -eq 0 ]
+then
+	avg_queue_hours=0
+else
+	avg_queue_hours=$(( total_hours / njobs ))
+fi
+
+check_value ${avg_queue_hours} ${WARNING} ${CRITICAL}
+status=$?
+echo ${avg_queue_hours}
+exit ${status}
