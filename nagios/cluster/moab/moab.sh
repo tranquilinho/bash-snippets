@@ -8,7 +8,7 @@ readonly USED_QUEUE_PROCESSORS=3
 
 check_moab_command(){
     if [ -z ${MOAB_PATH} ]; then
-	echo MOAB path undefined > 2
+	echo MOAB path undefined 1>&2
 	return ${MOAB_PATH_UNDEFINED}
     fi
     readonly command=$1

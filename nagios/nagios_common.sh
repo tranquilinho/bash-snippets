@@ -11,6 +11,7 @@ print_usage() {
         echo "Options:"
         echo -e "\t -w [value]           set warning value"
         echo -e "\t -c [value]           set critical value"
+        echo -e "\t -Z                   report for Zabbix"
         echo
         echo "If no options are given, ${prog_name} will print only status."
         echo
@@ -18,7 +19,7 @@ print_usage() {
 
 parse_cmd_arguments(){
   if [ "$#" -gt 0 ]; then
-    while getopts ":c:w:" options; do
+    while getopts "c:w:Z" options; do
       case "${options}" in
         c)
           readonly CRITICAL=${OPTARG}
@@ -26,8 +27,11 @@ parse_cmd_arguments(){
         w)
           readonly WARNING=${OPTARG}
         ;;
+	Z)
+	  readonly ZABBIX=1
+	;;
         *)
-          echo "Unknow option" > 2
+          echo "Unknow option" 1>&2 
           print_usage
         ;;
        esac
