@@ -12,12 +12,20 @@ parse_cmd_arguments $@
 
 total_hours=0
 queued_jobs=$( get_jobs_in_queue)
+readonly cmd_return=$?
+
+[ ${cmd_return} -ne 0 ] && if [ check_value "${queued_jobs}" ${WARNING} ${CRITICAL} ${cmd_return} -ne 0 ]; then
+    exit $?
+fi
+
 njobs=${#queued_jobs[@]}
 
 for job in "${queued_jobs[@]}"; do
-    queue_time=$( get_queue_time ${job} )
-    queue_hours=$( time_to_hours ${queue_time} )
-    total_hours=$(( total_hours + queue_hours ))
+    if [ ! -z ${job} ]; then
+	queue_time=$( get_queue_time ${job} )
+	queue_hours=$( time_to_hours ${queue_time} )
+	total_hours=$(( total_hours + queue_hours ))
+    fi
 done
 
 if [ ${njobs} -eq 0 ]

@@ -8,9 +8,13 @@
 
 parse_cmd_arguments $@
 
-readonly blocked=$( get_blocked_jobs )
+blocked=$( get_blocked_jobs )
+readonly cmd_return=$?
+if [ "a${blocked}" == "a" ]; then
+    blocked="?"
+fi
+check_value "${blocked}" ${WARNING} ${CRITICAL} ${cmd_return}
 
-check_value ${blocked} ${WARNING} ${CRITICAL}
 status=$?
 echo ${blocked}
 exit ${status}

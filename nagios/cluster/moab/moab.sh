@@ -7,12 +7,12 @@ readonly TOTAL_QUEUE_PROCESSORS=5
 readonly USED_QUEUE_PROCESSORS=3
 
 check_moab_command(){
-    if [ -z ${MOAB_PATH} ]; then
+    if [ -z ${MOAB_PATH} -o -z ${MOAB_SBIN_PATH} ]; then
 	echo MOAB path undefined 1>&2
 	return ${MOAB_PATH_UNDEFINED}
     fi
     readonly command=$1
-    if [ ! -x ${MOAB_PATH}/${command} ]; then
+    if [ ! -x ${MOAB_PATH}/${command} -a ! -x ${MOAB_SBIN_PATH}/${command} ]; then
 	echo Command ${command} not available 1>&2
 	return ${COMMAND_NOT_AVAILABLE}
     fi
@@ -44,8 +44,16 @@ get_jobs_in_queue(){
 	return ${err}
     fi
 
-    local -r fields=($( ${MOAB_PATH}/showq -i | egrep -v 'jobs|Total|JOBID|eligible' | sed "/^$/d" ))
-    echo ${fields[0]}
+    local -r tmp_file=$( mktemp )
+    ${MOAB_PATH}/showq -i > ${tmp_file} 2>&1
+    err=$?
+    [ ${err} -ne ${OK} ] && head -1 ${tmp_file} && return ${err}
+
+    local -r fields=($( cat ${tmp_file} | egrep -v 'jobs|Total|JOBID|eligible' | sed "/^$/d" ))
+    if [ ${#fields[@]} -gt 0 ]; then
+		echo ${fields[0]}
+    fi
+    rm ${tmp_file}
     return ${OK}
 }
 
@@ -57,22 +65,33 @@ get_blocked_jobs(){
 	return ${err}
     fi
 
-    local -r fields=($( ${MOAB_PATH}/showq -b | grep "blocked job" | tail -1 ))
+    local -r tmp_file=$( mktemp )
+    ${MOAB_PATH}/showq -b > ${tmp_file} 2>&1
+    err=$?
+    [ ${err} -ne ${OK} ] && head -1 ${tmp_file} && return ${err}
+
+    local -r fields=($( cat ${tmp_file} | grep "blocked job" | tail -1 ))
     echo ${fields[0]}
-    return ${OK}
+    rm ${tmp_file}
+    return ${err}
 }
 
 get_active_jobs(){
-    local err=${OK}
+    err=${OK}
     check_moab_command "showq"
     err=$?
     if [ ${err} -ne ${OK} ]; then
 	return ${err}
     fi
 
-    local -r fields=($( ${MOAB_PATH}/showq -r | grep "local jobs" ))
+    local -r tmp_file=$( mktemp )
+    ${MOAB_PATH}/showq -r > ${tmp_file} 2>&1
+    err=$?
+    [ ${err} -ne ${OK} ] && head -1 ${tmp_file} && return ${err}
+    local -r fields=($( cat ${tmp_file} | grep "local jobs" ))
     echo ${fields[0]}
-    return ${OK}
+    rm ${tmp_file}
+    return ${err}
 }
 
 
@@ -163,3 +182,21 @@ get_green_nodes(){
     return ${OK}
 }
 
+
+get_license_status(){
+    err=${OK}
+    check_moab_command "moab"
+    err=$?
+    if [ ${err} -ne ${OK} ]; then
+	return ${err}
+    fi
+
+    local -r tmp_file=$( mktemp )
+    # --about returns 1 when expired...
+   ${MOAB_SBIN_PATH}/moab --about > ${tmp_file} 2>&1
+     local -r fields=($( cat ${tmp_file} | grep "License" ))
+    echo ${fields[2]}
+    rm ${tmp_file}
+    return ${err}
+
+}

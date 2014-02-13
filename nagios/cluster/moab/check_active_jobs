@@ -8,9 +8,12 @@
 
 parse_cmd_arguments $@
 
-readonly active=$( get_active_jobs )
-
-check_value ${active} ${WARNING} ${CRITICAL}
+active=$( get_active_jobs )
+readonly cmd_return=$?
+if [ "a${active}" == "a" ]; then
+    active="?"
+fi
+check_value "${active}" ${WARNING} ${CRITICAL} ${cmd_return}
 status=$?
 echo ${active}
 exit ${status}

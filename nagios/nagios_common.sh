@@ -19,7 +19,7 @@ print_usage() {
 
 parse_cmd_arguments(){
   if [ "$#" -gt 0 ]; then
-    while getopts "c:w:Z" options; do
+    while getopts "c:w:u:Z" options; do
       case "${options}" in
         c)
           readonly CRITICAL=${OPTARG}
@@ -29,6 +29,9 @@ parse_cmd_arguments(){
         ;;
 	Z)
 	  readonly ZABBIX=1
+	;;
+	u)
+	  readonly URL=${OPTARG}
 	;;
         *)
           echo "Unknow option" 1>&2 
@@ -44,6 +47,12 @@ check_value(){
 	local -r value="$1"
 	local -r warning="$2"
 	local -r critical="$3"
+	local -r cmd_return_local="$4"
+
+	[ "${cmd_return_local}" ] && if [ ${cmd_return_local=} -ne 0 ]; then
+	    echo -n "[ERROR] ${value}"
+	    return ${STATUS_CRITICAL}
+	fi
 
 	[ "${critical}" ] && \
 	    if [ ${value} -ge ${critical} ]; then
@@ -59,6 +68,27 @@ check_value(){
 
 	return ${OK}
 }
+
+check_text_value(){
+	local -r value="$1"
+	local -r critical="$2"
+	local -r cmd_return_local="$3"
+
+	[ "${cmd_return_local}" ] && if [ ${cmd_return_local=} -ne 0 ]; then
+	    echo -n "[ERROR] ${value}"
+	    return ${STATUS_CRITICAL}
+	fi
+
+	[ "${critical}" ] && \
+	    if [ ${value} == ${critical} ]; then
+	      echo -n "[CRITICAL] ${critical} "
+	      return ${STATUS_CRITICAL}
+	    fi
+	
+	echo "[OK]"
+	return ${OK}
+}
+
 
 time_to_hours(){
     # time might include days or not:
