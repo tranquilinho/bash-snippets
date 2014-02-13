@@ -1,0 +1,15 @@
+#!/bin/bash
+# Monitor green nodes
+# Author: Jesus Cuenca (jcuenca@cnb.csic.es)
+# See License file
+
+. /etc/nagios/custom_scripts.cfg
+. ${MOAB_LIB}
+
+parse_cmd_arguments $@
+
+readonly license_status=$( get_license_status )
+
+check_text_value ${license_status} "expired."
+status=$?
+exit ${status}
