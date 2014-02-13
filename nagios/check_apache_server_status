@@ -1,0 +1,27 @@
+#!/bin/bash
+
+. /etc/nagios/custom_scripts.cfg
+
+parse_cmd_arguments $@
+
+readonly pattern="requests/sec"
+
+stats=$( wget --quiet -O - ${URL} | grep "${pattern}" )
+# example: <dt>.186 requests/sec - 0.8 MB/second - 4.5 MB/request</dt>
+rps=$( expr match "${stats}" ".*\([0-9]*\)\.[0-9]* requests/sec.*")
+[ -z ${rps} ] && rps=0
+mps=$( expr match "${stats}" ".* \([0-9]*\)\.[0-9]* MB/second.*")
+[ -z ${mps} ] && mps=0
+mpr=$( expr match "${stats}" ".* \([0-9]*\.[0-9]*\) MB/request.*")
+
+check_value ${rps} ${WARNING} ${CRITICAL}
+status1=$?
+check_value ${mps} ${WARNING} ${CRITICAL}
+status2=$?
+
+status=${status1}
+[ ${status2} -gt ${status1} ] && status=${status2}
+
+echo ${rps} req/s ${mps} MB/s ${mpr} MB/req
+
+exit $status
