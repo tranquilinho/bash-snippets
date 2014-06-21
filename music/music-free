@@ -1,0 +1,37 @@
+#!/bin/bash
+# Simple script to remove "unpolite" symbols from file/dir names,
+# and convert mp3/m4a files to ogg
+
+readonly keep=$1
+readonly old_ifs=${IFS}
+IFS=$'\n'
+readonly files=($(ls))
+
+for f in ${files[@]}; do
+    ext=$(echo ${f} | sed 's_.*\.\(.*\)$_\1_g' )
+    ext=${ext,}
+    new_name=$(echo ${f} | tr " ()" "_\-\-" | tr -d "'")
+    new_name=${new_name/$ext/ogg}
+    new_name=${new_name/_-_/-}
+    echo "${f} -> ${new_name}"
+
+    if [ "qq${keep}" == "qq-k" ]; then
+	mv "${f}" "${new_name/ogg/$ext}"
+    elif [ ${ext} == "m4a" ]; then
+        ffmpeg -i "${f}" -map 0:0 -c:a libvorbis -qscale:a 7 ${new_name}
+        if [ $? -eq 0 ]; then
+            rm "${f}"
+        fi
+    elif [ ${ext} == "mp3" ]; then
+        sox "${f}" ${new_name}
+        if [ $? -eq 0 ]; then
+            rm "${f}"
+        fi
+    elif [ -d "${f}" ]; then
+        if [ "${f}" != ${new_name} ]; then
+            mv "${f}" ${new_name}
+        fi
+    fi
+done
+
+IFS=${old_ifs}
