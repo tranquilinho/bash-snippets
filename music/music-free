@@ -2,20 +2,47 @@
 # Simple script to remove "unpolite" symbols from file/dir names,
 # and convert mp3/m4a files to ogg
 
-readonly keep=$1
+print_usage() {
+	local prog_name=$( basename $0 )
+        echo "Usage: ${prog_name} -k -f FILE"
+        echo "-k: don't convert to ogg, just rename"
+        echo "-f FILE: free FILE (instead of all files in current dir)"
+        exit 0
+}
+
+keep=1
+while getopts "f:k" options; do
+    case "${options}" in
+        f)
+          files[0]="${OPTARG}"
+        ;;
+        k)
+          readonly keep=0
+        ;;
+        *)
+          echo "Unknow option" 1>&2 
+          print_usage
+        ;;
+       esac
+done
+
+if [ ${#files[@]} -eq 0 ]; then
+    files=($(ls))
+fi
+
 readonly old_ifs=${IFS}
 IFS=$'\n'
-readonly files=($(ls))
+
 
 for f in ${files[@]}; do
     ext=$(echo ${f} | sed 's_.*\.\(.*\)$_\1_g' )
     ext=${ext,}
-    new_name=$(echo ${f} | tr " ()" "_\-\-" | tr -d "'")
+    new_name=$(echo ${f} | tr " ()&" "_\-\-" | tr -d "'")
     new_name=${new_name/$ext/ogg}
     new_name=${new_name/_-_/-}
     echo "${f} -> ${new_name}"
 
-    if [ "qq${keep}" == "qq-k" ]; then
+    if [ ${keep} -eq 0 ]; then
 	mv "${f}" "${new_name/ogg/$ext}"
     elif [ ${ext} == "m4a" ]; then
         ffmpeg -i "${f}" -map 0:0 -c:a libvorbis -qscale:a 7 ${new_name}
