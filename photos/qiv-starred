@@ -1,0 +1,7 @@
+#!/bin/bash
+
+readonly album_dir=$1
+
+ls "${album_dir}" | while read image; do
+	exiftool -a "${image}" | grep star && echo ${image} >> starred.lst
+done

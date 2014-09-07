@@ -1,0 +1,44 @@
+#!/bin/bash
+# Argument sanity checking eliminated for brevity
+
+readonly command_log="~/bin/qiv-command.log"
+
+readonly command_number=$1
+readonly image=$2
+
+log_command(){
+	echo "$1" >> ${command_log}
+}
+
+case ${command_number} in
+    1)
+        # Set image comment
+	readonly comment=$(zenity  --title "Comment" --entry --text "Picture comment:")
+	exiftool -comment="${comment}" "${image}" 
+	log_command "exiftool -comment='${comment}' '${image}'" 
+    ;;
+    2)  
+        # Crop image
+        mirage "${image}" & 
+        ;;
+    4) 
+        # Add tags to image
+	tag=$(zenity --height 400 --list  --column "Tag" capoeira itaparica salvador arembepe)
+	exiftool -keyword+=${tag} "${image}"  
+	log_command "exiftool -keyword+=${tag} '${image}'"
+    ;;
+    5) 
+        # Star image
+	exiftool -keyword+=star "${image}"  
+	log "exiftool -keyword+=star '${image}'"
+    ;;
+    6) 
+        # Get tags and comment
+	exiftool -a "${image}" | egrep "Comment|Keyword"
+    ;;
+    *) 
+        echo "Unrecognized command";
+        exit 2
+    ;;
+esac
+
