@@ -34,25 +34,26 @@ readonly old_ifs=${IFS}
 IFS=$'\n'
 
 
-for f in ${files[@]}; do
+ls | while read f ; do
+	echo ${f}
     ext=$(echo ${f} | sed 's_.*\.\(.*\)$_\1_g' )
     ext=${ext,}
-    new_name=$(echo ${f} | tr " ()&" "_\-\-" | tr -d "'")
+    new_name=$(echo ${f} | tr " ()&[]" "_\-\-" | tr -d "'")
     new_name=${new_name/$ext/ogg}
     new_name=${new_name/_-_/-}
     echo "${f} -> ${new_name}"
 
     if [ ${keep} -eq 0 ]; then
 	mv "${f}" "${new_name/ogg/$ext}"
-    elif [ ${ext} == "m4a" ]; then
-        ffmpeg -i "${f}" -map 0:0 -c:a libvorbis -qscale:a 7 ${new_name}
+    elif [ ${ext} == "m4a" -o ${ext} == "flac" ]; then
+        echo ffmpeg -i "${f}" -map 0:0 -c:a libvorbis -qscale:a 7 ${new_name} >> todo
         if [ $? -eq 0 ]; then
-            rm "${f}"
+            echo rm "${f}"
         fi
     elif [ ${ext} == "mp3" ]; then
         sox "${f}" ${new_name}
         if [ $? -eq 0 ]; then
-            rm "${f}"
+            echo rm "${f}"
         fi
     elif [ -d "${f}" ]; then
         if [ "${f}" != ${new_name} ]; then
