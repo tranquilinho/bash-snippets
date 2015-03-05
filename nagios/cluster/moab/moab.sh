@@ -1,13 +1,13 @@
 # get info using moab commands
 # you can adapt this library to your resource manager, just keep the function names and semantics
 
-readonly MOAB_PATH_UNDEFINE=16
+readonly MOAB_PATH_UNDEFINED=16
 readonly COMMAND_NOT_AVAILABLE=32
 readonly TOTAL_QUEUE_PROCESSORS=5
 readonly USED_QUEUE_PROCESSORS=3
 
 check_moab_command(){
-    if [ -z ${MOAB_PATH} -o -z ${MOAB_SBIN_PATH} ]; then
+    if [ -z "${MOAB_PATH}" -o -z "${MOAB_SBIN_PATH}" ]; then
 	echo MOAB path undefined 1>&2
 	return ${MOAB_PATH_UNDEFINED}
     fi
@@ -28,10 +28,10 @@ get_queue_time(){
 	return ${err}
     fi
     err=${OK}
-    readonly job_id=$1
+    readonly job_id=${1%\*}
     result=($( ${MOAB_PATH}/checkjob ${job_id} | grep Queued))
     err=$?
-    queue_time=${result[3]}
+    queue_time=${result[3]%}
     echo "${queue_time}"
     return ${err}
 }
@@ -45,14 +45,13 @@ get_jobs_in_queue(){
     fi
 
     local -r tmp_file=$( mktemp )
-    ${MOAB_PATH}/showq -i > ${tmp_file} 2>&1
+    # if you want to check only idle jobs, you can use -i
+    ${MOAB_PATH}/showq > ${tmp_file} 2>&1
     err=$?
     [ ${err} -ne ${OK} ] && head -1 ${tmp_file} && return ${err}
 
-    local -r fields=($( cat ${tmp_file} | egrep -v 'jobs|Total|JOBID|eligible' | sed "/^$/d" ))
-    if [ ${#fields[@]} -gt 0 ]; then
-		echo ${fields[0]}
-    fi
+    cat ${tmp_file} | egrep -v 'jobs|Total|JOBID|eligible|JobName|IDLE|JOBNAME|BLOCKED' | sed "/^$/d" | awk '{print $1}'
+
     rm ${tmp_file}
     return ${OK}
 }

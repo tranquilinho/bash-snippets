@@ -98,6 +98,8 @@ time_to_hours(){
     IFS=":" read -ra time_fields <<< "${time}"
     if [ ${#time_fields[@]} -eq 4 ]; then
         hours=${time_fields[1]}
+	days=${time_fields[0]}
+	hours=$(( days * 24 + hours))
     else
 	hours=${time_fields[0]}
     fi

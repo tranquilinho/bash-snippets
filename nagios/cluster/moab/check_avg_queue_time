@@ -5,13 +5,14 @@
 # Note: inspecting users jobs require privileges that nagios account may not have
 # So you probably will have to run this script with sudo...
 
-. /etc/nagios/custom_scripts.cfg
+. /home/cnb/jcuenca/custom_scripts.cfg
+
 . ${MOAB_LIB}
 
 parse_cmd_arguments $@
 
 total_hours=0
-queued_jobs=$( get_jobs_in_queue)
+declare -a queued_jobs=($( get_jobs_in_queue))
 readonly cmd_return=$?
 
 [ ${cmd_return} -ne 0 ] && if [ check_value "${queued_jobs}" ${WARNING} ${CRITICAL} ${cmd_return} -ne 0 ]; then
