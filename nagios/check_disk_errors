@@ -1,0 +1,38 @@
+#!/bin/bash
+# Report read-only filesystems and disk errors
+# Author: Jesus Cuenca (jcuenca@cnb.csic.es)
+# See License file
+
+# !!!! check also SMART disk status
+
+. /etc/nagios/custom_scripts.cfg
+
+status=${OK}
+readonly MIN=1000
+
+readonly read_errors=($( grep "read error" /var/log/messages ))
+
+if [ ${#read_errors[@]} -gt 0 ]; then
+	echo \[WARNING\] ${#read_errors[@]} read errors...
+	exit ${STATUS_WARNING}
+else
+    relevant_fs=($(mount | egrep "ext3|ext4| nfs[34 ]|xfs"))
+    i=2
+    while [ ${i} -lt ${#relevant_fs[@]} ]; do
+	fspath=${relevant_fs[i]}
+	testfile=$(mktemp --tmpdir=${fspath})
+        if touch ${testfile}; then
+	    rm ${testfile}
+	else
+	    echo ${fspath} is mounted read only
+	    status=${STATUS_CRITICAL}
+	fi
+	i=$((i + 6))
+    done
+fi
+
+if [ ${status} -eq ${OK} ]; then
+	echo OK
+fi
+
+exit ${status}

@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Author: Jesus Cuenca (jcuenca@cnb.csic.es)
+# See License file
+
+. /etc/nagios/custom_scripts.cfg
+
+parse_cmd_arguments $@
+
+readonly uptime_seconds=$(cat /proc/uptime | cut -d. -f 1)
+
+check_value ${uptime_seconds} ${WARNING:-0} ${CRITICAL:-0}
+status=$?
+echo "${uptime_seconds} seconds"
+exit ${status}

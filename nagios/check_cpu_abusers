@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Report processes that accumulated more than 1 hour of CPU time
+# Author: Jesus Cuenca (jcuenca@cnb.csic.es)
+# See License file
+
+. /etc/nagios/custom_scripts.cfg
+
+readonly excluded_procs="mmfs\|moab"
+cpu_abusers=($( ps -e -o cputime,user,args | awk '$1 ~ /.-..:..:../ {print $0} $1 ~ /^..:..:../ { split($1,fields,":"); hours=fields[1] + 0; if(hours >= 1) print $0;}' | grep -v "${excluded_procs}" ))
+
+if [ ${#cpu_abusers[@]} -gt 0 ]; then
+	echo "\[WARNING\] ${cpu_abusers[@]}."
+	exit ${STATUS_WARNING}
+else
+	echo "OK"
+	exit ${OK}
+fi
+
+

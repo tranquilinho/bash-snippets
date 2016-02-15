@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Report cgroups reaching memory thresholds
+# Author: Jesus Cuenca (jcuenca@cnb.csic.es)
+# See License file
+
+. /etc/nagios/custom_scripts.cfg
+
+readonly rss=$(grep "total_rss " /sys/fs/cgroup/common_mem_pool/memory.stat | cut -f 2 -d' ')
+readonly limit=$(grep "hierarchical_memsw_limit " /sys/fs/cgroup/common_mem_pool/memory.stat | cut -f 2 -d' ')
+readonly warn_threshold=$(( limit * 85 / 100 ))
+readonly crit_threshold=$(( limit * 90 / 100 ))
+
+check_value ${rss} ${warn_threshold} ${crit_threshold} && echo "[OK]${rss}"
+exit $?
