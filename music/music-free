@@ -46,10 +46,10 @@ ls | while read f ; do
     if [ ${keep} -eq 0 ]; then
 	mv "${f}" "${new_name/ogg/$ext}"
     elif [ ${ext} == "m4a" -o ${ext} == "flac" ]; then
-        echo ffmpeg -i "${f}" -map 0:0 -c:a libvorbis -qscale:a 7 ${new_name} >> todo
-        if [ $? -eq 0 ]; then
-            echo rm "${f}"
-        fi
+        echo ffmpeg -i \"${f}\" -map 0:0 -c:a libvorbis -qscale:a 7 ${new_name} >> todo
+        # if [ $? -eq 0 ]; then
+        #     echo rm "${f}"
+        # fi
     elif [ ${ext} == "mp3" ]; then
         sox "${f}" ${new_name}
         if [ $? -eq 0 ]; then

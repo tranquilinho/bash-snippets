@@ -1,7 +1,7 @@
 #!/bin/bash
 # Argument sanity checking eliminated for brevity
 
-readonly command_log="~/bin/qiv-command.log"
+readonly command_log="${HOME}/bin/qiv-command.log"
 
 readonly command_number=$1
 readonly image=$2
@@ -23,19 +23,29 @@ case ${command_number} in
         ;;
     4) 
         # Add tags to image
-	tag=$(zenity --height 400 --list  --column "Tag" capoeira itaparica salvador arembepe)
+	tag=$(zenity --height 400 --list  --column "Tag" capoeira happy-japan)
 	exiftool -keyword+=${tag} "${image}"  
 	log_command "exiftool -keyword+=${tag} '${image}'"
     ;;
     5) 
-        # Star image
-	exiftool -keyword+=star "${image}"  
-	log "exiftool -keyword+=star '${image}'"
+        # (un)Star image
+        operation="+"
+        exiftool -a "${image}" | grep star && operation="-"
+	exiftool -keyword${operation}=star "${image}"  
+	log_command "exiftool -keyword${operation}=star '${image}'"
     ;;
     6) 
         # Get tags and comment
 	exiftool -a "${image}" | egrep "Comment|Keyword"
     ;;
+    7)
+	# mark for deletion - not needed, qiv provides "d" command
+	# echo "${image}" >> images_to_delete
+	# Rotate
+	mogrify -rotate "-90" "$2"; exit;;
+    ;;
+    8) mogrify -rotate "90" "$2"; exit;;
+	;;
     *) 
         echo "Unrecognized command";
         exit 2

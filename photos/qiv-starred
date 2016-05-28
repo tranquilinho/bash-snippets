@@ -1,7 +1,11 @@
 #!/bin/bash
 
+[ $# -ne 1 ] && echo "Syntax: $0 album_dir" && exit 2
+
 readonly album_dir=$1
 
+echo > ${album_dir}/starred.lst
 ls "${album_dir}" | while read image; do
-	exiftool -a "${image}" | grep star && echo ${image} >> starred.lst
+	exiftool -a "${image}" | grep star > /dev/null && echo ${image} >> ${album_dir}/starred.lst
+	echo -n "."
 done
