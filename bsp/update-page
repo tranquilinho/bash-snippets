@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Simple script to update BSP pages
+# part of https://github.com/tranquilinho/bash-snippets
+# Contact: jesus.cuenca@gmail.com
+
+regex_start=".*<!-- BSP .+ -->"
+regex_end=".*<!-- BSP -->"
+
+# to preserve leading whitespaces in line, use empty IFS:
+IFS=''
+cat | while read line; do
+	  if [[ "${line}" =~ ${regex_start} ]]; then
+	      command=${line%% -->*}
+	      command=${command##*<!-- BSP }
+	      echo "${line}"
+	      skip_input_line=1
+	  elif [[ "${line}" =~ ${regex_end} ]]; then
+	      eval "./${command}"
+	      echo "${line}"	      
+	      skip_input_line=0
+	  elif [ ${skip_input_line} == 0 ]; then
+	      echo "${line}"
+	  fi
+      done
