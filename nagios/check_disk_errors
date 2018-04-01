@@ -1,6 +1,6 @@
 #!/bin/bash
 # Report read-only filesystems and disk errors
-# Author: Jesus Cuenca (jcuenca@cnb.csic.es)
+# Author: Jesus Cuenca (jesus.cuenca@gmail.com)
 # See License file
 
 # !!!! check also SMART disk status

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Monitor MOAB's hours in queue (average)
-# Author: Jesus Cuenca (jcuenca@cnb.csic.es)
+# Author: Jesus Cuenca (jesus.cuenca@gmail.com)
 # See License file
 # Note: inspecting users jobs require privileges that nagios account may not have
 # So you probably will have to run this script with sudo...

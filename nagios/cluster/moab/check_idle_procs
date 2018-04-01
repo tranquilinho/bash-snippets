@@ -1,6 +1,6 @@
 #!/bin/bash
 # Monitor MOAB's idle processors
-# Author: Jesus Cuenca (jcuenca@cnb.csic.es)
+# Author: Jesus Cuenca (jesus.cuenca@gmail.com)
 # See License file
 
 . /etc/nagios/custom_scripts.cfg

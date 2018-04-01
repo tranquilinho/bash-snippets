@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Monitor web sites by content (pages / files). Report pageload time.
-# Author: Jesus Cuenca (jcuenca@cnb.csic.es)
+# Author: Jesus Cuenca (jesus.cuenca@gmail.com)
 # See License file
 
 . /etc/nagios/custom_scripts.cfg
