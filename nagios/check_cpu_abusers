@@ -4,7 +4,7 @@
 # Author: Jesus Cuenca (jesus.cuenca@gmail.com)
 # See License file
 
-. /etc/nagios/custom_scripts.cfg
+. $(dirname ${BASH_SOURCE[0]})/nagios_common.sh
 
 readonly excluded_procs="mmfs\|moab"
 cpu_abusers=($( ps -e -o cputime,user,args | awk '$1 ~ /.-..:..:../ {print $0} $1 ~ /^..:..:../ { split($1,fields,":"); hours=fields[1] + 0; if(hours >= 1) print $0;}' | grep -v "${excluded_procs}" ))

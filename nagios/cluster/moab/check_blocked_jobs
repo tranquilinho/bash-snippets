@@ -3,7 +3,7 @@
 # Author: Jesus Cuenca (jesus.cuenca@gmail.com)
 # See License file
 
-. /etc/nagios/custom_scripts.cfg
+. $(dirname ${BASH_SOURCE[0]})/nagios_common.sh
 . ${MOAB_LIB}
 
 parse_cmd_arguments $@

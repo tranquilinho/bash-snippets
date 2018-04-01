@@ -4,7 +4,7 @@
 # Author: Jesus Cuenca (jesus.cuenca@gmail.com)
 # See License file
 
-. /etc/nagios/custom_scripts.cfg
+. $(dirname ${BASH_SOURCE[0]})/nagios_common.sh
 
 readonly check_script=${custom_scripts_path}/web/check_webpage_content
 

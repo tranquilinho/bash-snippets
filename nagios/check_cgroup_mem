@@ -4,7 +4,7 @@
 # Author: Jesus Cuenca (jesus.cuenca@gmail.com)
 # See License file
 
-. /etc/nagios/custom_scripts.cfg
+. $(dirname ${BASH_SOURCE[0]})/nagios_common.sh
 
 readonly rss=$(grep "total_rss " /sys/fs/cgroup/common_mem_pool/memory.stat | cut -f 2 -d' ')
 readonly limit=$(grep "hierarchical_memsw_limit " /sys/fs/cgroup/common_mem_pool/memory.stat | cut -f 2 -d' ')

@@ -5,7 +5,7 @@
 
 # !!!! check also SMART disk status
 
-. /etc/nagios/custom_scripts.cfg
+. $(dirname ${BASH_SOURCE[0]})/nagios_common.sh
 
 status=${OK}
 readonly MIN=1000
