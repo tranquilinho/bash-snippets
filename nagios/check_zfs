@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# Report ZFS pool status
+# Author: Jesus Cuenca (jesus.cuenca@gmail.com)
+# See License file
+
+. $(dirname ${BASH_SOURCE[0]})/nagios_common.sh
+
+readonly zfs_state_full=$(zpool status | grep "state:")
+readonly zfs_state=${zfs_state_full##*: }
+readonly zfs_errors_line=$(zpool status | grep "errors:")
+
+if [ "${zfs_state}" != "ONLINE" ]; then
+    echo "[CRITICAL] State: ${zfs_state}. Errors: ${zfs_errors}"
+    exit ${STATUS_CRITICAL}
+else
+    echo "[OK] State: ${zfs_state}, ${zfs_errors_line}"
+    exit ${OK}
+fi
+
+
