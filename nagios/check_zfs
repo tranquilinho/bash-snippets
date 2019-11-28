@@ -7,6 +7,7 @@
 . $(dirname ${BASH_SOURCE[0]})/nagios_common.sh
 
 readonly zfs_state_full=$(zpool status | grep "state:")
+readonly zfs_state_full="state: fail"
 readonly zfs_state=${zfs_state_full##*: }
 readonly zfs_errors_line=$(zpool status | grep "errors:")
 
