@@ -1,0 +1,38 @@
+#!/bin/bash
+# Monitor Slurm's down nodes
+# Author: Jesus Cuenca (jesus.cuenca@gmail.com)
+# See License file
+
+. $(dirname ${BASH_SOURCE[0]})/../../nagios_common.sh
+
+parse_cmd_arguments $@
+
+readonly node_report=$(mktemp)
+sinfo -h -N --format="%.8N %.16t" | uniq > ${node_report}
+readonly node_total=$(wc -l < ${node_report})
+readonly down_nodes=$(grep fail ${node_report} | wc -l)
+readonly drain_nodes=$(grep drain ${node_report} | wc -l)
+readonly ok_nodes=$(egrep 'idle|alloc|mix' ${node_report} | wc -l)
+
+readonly sum=$(( down_nodes + drain_nodes + ok_nodes))
+
+status=${STATUS_OK}
+
+if [ ${sum} -ne ${node_total} ]; then
+	status=${STATUS_CRITICAL}
+fi
+
+if [ ${drain_nodes} -gt 1 ]; then
+	status=${STATUS_CRITICAL}
+elif [ ${drain_nodes} -gt 0 ]; then
+	status=${STATUS_WARNING}
+fi
+if [ ${down_nodes} -gt 0 ]; then
+	status=${STATUS_CRITICAL}
+fi
+
+echo "Drained: ${drain_nodes}, down: ${down_nodes}, up: ${ok_nodes} (total: ${node_total})"
+
+rm ${node_report}
+
+exit ${status}
